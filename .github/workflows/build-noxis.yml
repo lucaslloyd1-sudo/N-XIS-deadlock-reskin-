@@ -1,0 +1,33 @@
+name: Build NØXIS Linux executable
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libasound2-dev libx11-dev libxkbcommon-dev libegl1-mesa-dev libgl1-mesa-dev
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build NØXIS
+        run: cargo build --locked --release --package deadlocked --bin deadlocked
+
+      - name: Package executable
+        run: |
+          mkdir -p dist
+          install -m 755 target/release/deadlocked dist/noxis
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: noxis-linux-x86_64
+          path: dist/noxis
